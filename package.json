@@ -1,0 +1,20 @@
+{
+  "name": "arco-pro-component",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "qran",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "table": "yarn workspace q-table",
+    "prepare": "husky"
+  },
+  "workspaces": [
+    "lib/*"
+  ],
+  "devDependencies": {
+    "husky": "^9.1.2",
+    "lint-staged": "^15.2.7",
+    "prettier-plugin-organize-imports": "^4.0.0"
+  }
+}
