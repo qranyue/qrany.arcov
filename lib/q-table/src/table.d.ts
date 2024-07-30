@@ -1,5 +1,5 @@
 import type { DefineComponent } from "vue";
-import type { Column } from "./column";
+import type { QColumn } from "./column";
 import type { UseTable } from "./hooks";
 
 export const defaultPagination: (pagination: {}) => void;
@@ -24,7 +24,7 @@ type QTableProps = {
   /**
    * 表格列
    */
-  columns: Column[];
+  columns: QColumn[];
 
   /**
    * 请求函数

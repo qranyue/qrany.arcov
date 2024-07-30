@@ -3,6 +3,8 @@ import "@arco-design/web-vue/es/card/style/css";
 import "@arco-design/web-vue/es/table/style/css";
 import { defineComponent, reactive, watch } from "vue";
 import { useTableContext } from "./hooks";
+import { QQuery } from "./query";
+import { TableRender } from "./render";
 import { isNull, pick } from "./utils";
 
 const pagination = { showPageSize: true, showTotal: true };
@@ -26,13 +28,14 @@ export const QTable = defineComponent({
     initial: { type: Boolean, default: true },
   },
 
-  setup(props) {
+  setup(props, { slots }) {
     const [table, ctx] = useTableContext(props.table);
 
     const other = {};
     const data = reactive({
       loading: false,
-      keys: [],
+      sets: [],
+      sorts: [],
       cols: {},
       data: [],
     });
@@ -42,7 +45,7 @@ export const QTable = defineComponent({
       total: 0,
     });
 
-    const parseForm = (form) => {
+    const parse = (form) => {
       const old = { ...table.form, ...form };
       const now = {};
       for (const c of props.columns) {
@@ -57,7 +60,7 @@ export const QTable = defineComponent({
     const query = async (form) => {
       try {
         data.loading = true;
-        const promise = props.request(parseForm(form), other.filter, other.sorter);
+        const promise = props.request(parse(form), other.filter, other.sorter);
         data.data = (await promise).data;
         pagi.total = (await promise).total;
         return await promise;
@@ -70,27 +73,59 @@ export const QTable = defineComponent({
       query,
       reload: () => {
         pagi.current = 1;
-        ctx.form({}, "set");
+        ctx.form(void 0, "set");
         ctx.select([], []);
         return query();
       },
     });
 
+    const dicts = reactive({
+      options: {},
+      filter: {},
+      enum: {},
+    });
+
+    const getDicts = (v = []) => {
+      const res = { options: [], filter: [], enum: {} };
+      for (const x of v) {
+        res.options.push({ value: x[0], label: x[1] });
+        res.filter.push({ value: x[0], text: x[1] });
+        res.enum[x[0]] = x[1];
+      }
+      return res;
+    };
+    const setDicts = async (c) => {
+      if (!c.props?.options && !c.query?.request) return;
+      const before = getDicts(c.props?.options);
+      dicts.options[c.key] = before.options;
+      dicts.filter[c.key] = before.filter;
+      dicts.enum[c.key] = before.enum;
+      const promise = c.query?.request?.(table.form);
+      if (!promise) return;
+      const after = getDicts(await promise);
+      dicts.options[c.key] = after.options;
+      dicts.filter[c.key] = after.filter;
+      dicts.enum[c.key] = after.enum;
+    };
+
     watch(
       () => props.columns,
       (v) => {
-        const [keys, cols, def] = [[], {}, {}];
+        const [sets, sorts, cols, def] = [[], [], {}, {}];
         for (const c of v) {
+          const x = pick(c, "key", "title", "type", "width", "minWidth", "align", "fixed");
+          setDicts(c);
           if (c.hide === true) continue;
-          const x = pick(c, "key", "title", "width", "minWidth", "align", "fixed");
           if (!isNull(c.query?.default)) def[c.key] = c.query.default;
           if (c.sorter) x.sortable = { sorter: c.sorter };
           cols[x.key] = x;
-          keys.push([x.key, x.title]);
+          sets.push([x.key, x.title]);
+          sorts.push(x.key);
         }
         ctx.config({ def });
         data.cols = cols;
-        data.keys = keys;
+        data.sets = sets;
+        data.sorts = sorts;
       },
       { immediate: true },
     );
@@ -105,11 +140,6 @@ export const QTable = defineComponent({
       { immediate: true },
     );
 
-    const column$ = (k) => {
-      const x = data.cols[k[0]];
-      return <TableColumn key={x.key} dataIndex={x.key} title={x.title}></TableColumn>;
-    };
-
     const onPageChange = (page) => {
       pagi.current = page;
       query();
@@ -119,10 +149,27 @@ export const QTable = defineComponent({
       query();
     };
 
+    const cell$ = ({ record, column }) => {
+      const k = column.dataIndex;
+      const c = data.cols[k];
+      return slots.body?.({ key: k, record, dicts: dicts.enum }) || <TableRender type={c.type} value={record[k]} dict={dicts.enum[k]} />;
+    };
+
+    const column$ = (k) => {
+      const x = data.cols[k];
+      return (
+        <TableColumn key={x.key} dataIndex={x.key} {...pick(x, "title", "width", "minWidth", "align", "fixed")}>
+          {{ cell: cell$ }}
+        </TableColumn>
+      );
+    };
+
+    const columns$ = () => data.sorts.map(column$);
+
     const table$ = () => {
       return (
         <Table loading={data.loading} data={data.data} pagination={getPagination(pagi)} bordered={false} onPageChange={onPageChange} onPageSizeChange={onPageSizeChange}>
-          {{ columns: () => data.keys.map(column$) }}
+          {{ columns: columns$ }}
         </Table>
       );
     };
@@ -130,8 +177,10 @@ export const QTable = defineComponent({
     return () => {
       return (
         <>
-          <div></div>
-          <Card>{[void 0, table$()]}</Card>
+          <Card>
+            <QQuery columns={props.columns} form={table.form} dicts={dicts.options} />
+          </Card>
+          <Card style={{ marginTop: "24px" }}>{table$()}</Card>
         </>
       );
     };
