@@ -1,5 +1,5 @@
 import { computed, defineComponent } from "vue";
-import { digst, getImages } from "./utils";
+import { digit, get_images } from "./utils";
 
 const RenderImage = defineComponent({
   name: "RenderImage",
@@ -9,7 +9,7 @@ const RenderImage = defineComponent({
   },
 
   setup(props) {
-    const value = computed(() => getImages(props.value)[0]);
+    const value = computed(() => get_images(props.value)[0]);
     return () => {
       if (value.value?.url) return <img src={value.value.url} />;
       return <div>暂无图片</div>;
@@ -29,7 +29,7 @@ export const TableRender = defineComponent({
   setup(props) {
     return () => {
       if (props.type === "image") return <RenderImage value={props.value} />;
-      if (props.type === "number") return digst(props.value);
+      if (/number|digit/.test(props.type)) return digit(props.value);
       return props.dict[props.value] || props.value;
     };
   },

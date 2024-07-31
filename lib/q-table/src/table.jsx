@@ -5,7 +5,7 @@ import { defineComponent, reactive, watch } from "vue";
 import { useTableContext } from "./hooks";
 import { QQuery } from "./query";
 import { TableRender } from "./render";
-import { isNull, pick } from "./utils";
+import { get_dicts, is_null, pick } from "./utils";
 
 const pagination = { showPageSize: true, showTotal: true };
 export const defaultPagination = (config) => {
@@ -49,17 +49,18 @@ export const QTable = defineComponent({
       const old = { ...table.form, ...form };
       const now = {};
       for (const c of props.columns) {
-        if (c.query?.transform) Object.assign(now, c.query.transform(old));
-        else if (!isNull(old[c.key])) now[c.key] = old[c.key];
+        if (typeof c.query?.transform === "function") Object.assign(now, c.query.transform(old));
+        else if (!is_null(old[c.key])) now[c.key] = old[c.key];
       }
       now.current = pagi.current;
       now.pageSize = pagi.pageSize;
       return now;
     };
 
-    const query = async (form) => {
+    const query = async (page = pagi.current, form = {}) => {
       try {
         data.loading = true;
+        if (page !== pagi.current) pagi.current = page;
         const promise = props.request(parse(form), other.filter, other.sorter);
         data.data = (await promise).data;
         pagi.total = (await promise).total;
@@ -69,14 +70,15 @@ export const QTable = defineComponent({
       }
     };
 
+    const reload = () => {
+      ctx.form(void 0, "set");
+      ctx.select([], []);
+      return query(1);
+    };
+
     ctx.config({
       query,
-      reload: () => {
-        pagi.current = 1;
-        ctx.form(void 0, "set");
-        ctx.select([], []);
-        return query();
-      },
+      reload,
     });
 
     const dicts = reactive({
@@ -85,24 +87,15 @@ export const QTable = defineComponent({
       enum: {},
     });
 
-    const getDicts = (v = []) => {
-      const res = { options: [], filter: [], enum: {} };
-      for (const x of v) {
-        res.options.push({ value: x[0], label: x[1] });
-        res.filter.push({ value: x[0], text: x[1] });
-        res.enum[x[0]] = x[1];
-      }
-      return res;
-    };
-    const setDicts = async (c) => {
+    const set_dicts = async (c) => {
       if (!c.props?.options && !c.query?.request) return;
-      const before = getDicts(c.props?.options);
+      const before = get_dicts(c.props?.options);
       dicts.options[c.key] = before.options;
       dicts.filter[c.key] = before.filter;
       dicts.enum[c.key] = before.enum;
       const promise = c.query?.request?.(table.form);
       if (!promise) return;
-      const after = getDicts(await promise);
+      const after = get_dicts(await promise);
       dicts.options[c.key] = after.options;
       dicts.filter[c.key] = after.filter;
       dicts.enum[c.key] = after.enum;
@@ -114,9 +107,9 @@ export const QTable = defineComponent({
         const [sets, sorts, cols, def] = [[], [], {}, {}];
         for (const c of v) {
           const x = pick(c, "key", "title", "type", "width", "minWidth", "align", "fixed");
-          setDicts(c);
+          set_dicts(c);
           if (c.hide === true) continue;
-          if (!isNull(c.query?.default)) def[c.key] = c.query.default;
+          if (!is_null(c.query?.default)) def[c.key] = c.query.default;
           if (c.sorter) x.sortable = { sorter: c.sorter };
           cols[x.key] = x;
           sets.push([x.key, x.title]);
@@ -135,16 +128,15 @@ export const QTable = defineComponent({
       (v) => {
         ctx.config({ params: v });
         ctx.form();
-        if (props.initial) query();
+        if (props.initial) query(1);
       },
       { immediate: true },
     );
 
-    const onPageChange = (page) => {
-      pagi.current = page;
-      query();
+    const on_page_change = (page) => {
+      query(page);
     };
-    const onPageSizeChange = (size) => {
+    const on_page_size_change = (size) => {
       pagi.pageSize = size;
       query();
     };
@@ -168,7 +160,7 @@ export const QTable = defineComponent({
 
     const table$ = () => {
       return (
-        <Table loading={data.loading} data={data.data} pagination={getPagination(pagi)} bordered={false} onPageChange={onPageChange} onPageSizeChange={onPageSizeChange}>
+        <Table loading={data.loading} data={data.data} pagination={getPagination(pagi)} bordered={false} onPageChange={on_page_change} onPageSizeChange={on_page_size_change}>
           {{ columns: columns$ }}
         </Table>
       );
@@ -178,9 +170,9 @@ export const QTable = defineComponent({
       return (
         <>
           <Card>
-            <QQuery columns={props.columns} form={table.form} dicts={dicts.options} />
+            <QQuery loading={data.loading} columns={props.columns} form={table.form} dicts={dicts.options} onQuery={query} onReload={reload} />
           </Card>
-          <Card style={{ marginTop: "24px" }}>{table$()}</Card>
+          <Card style={{ "margin-top": "24px" }}>{table$()}</Card>
         </>
       );
     };
