@@ -1,14 +1,17 @@
-import type { DefineComponent } from "vue";
+import type { DefineSetupFnComponent, Slot, SlotsType } from "vue";
 import type { QColumn } from "./column";
 import type { UseTable } from "./hooks";
 
 export const defaultPagination: (pagination: {}) => void;
 
-type QTablePagination = { current: number; pageSize: number };
+interface QTablePagination {
+  current: number;
+  pageSize: number;
+}
 
-export type QTableRequest = (params: {} & QTablePagination, filter: {}, sorter: {}) => Promise<{ data: unknown[]; total: number }>;
+export type QTableRequest = (params: Record<string, unknown> & QTablePagination, filter: {}, sorter: {}) => Promise<{ data: unknown[]; total: number }>;
 
-type QTableProps = {
+interface QTableProps {
   /**
    * 表格基本使用
    * @default object
@@ -41,6 +44,10 @@ type QTableProps = {
    * @default true
    */
   initial?: boolean;
-};
+}
 
-export const QTable: DefineComponent<QTableProps, {}, {}, {}, {}, {}, {}>;
+interface QTableSlots {
+  body?: Slot<{ key: string; record: unknown; value: unknown }>;
+}
+
+export const QTable: DefineSetupFnComponent<QTableProps, {}, SlotsType<QTableSlots>>;

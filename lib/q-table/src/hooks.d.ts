@@ -1,6 +1,6 @@
 export interface UseTable {
   form: Record<string, unknown>;
-  selectedRowKeys: string[] | number[];
+  selectedKeys: string[] | number[];
   selectedRows: unknown[];
 
   query: (form: Record<string, unknown>) => Promise<{ data: unknown[]; total: number }>;

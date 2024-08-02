@@ -12,15 +12,8 @@ import { defineComponent, ref, watch } from "vue";
 import { useTableProvide } from "./hooks";
 import { pick } from "./utils";
 
-const FieldDigit = defineComponent({
-  name: "FieldDigst",
-  props: {
-    value: { type: Array, default: () => [] },
-  },
-  emits: {
-    "update:value": (v) => Array.isArray(v),
-  },
-  setup(props, { emit }) {
+const FieldDigit = defineComponent(
+  (props, { emit }) => {
     const value = ref([]);
 
     watch(
@@ -55,20 +48,19 @@ const FieldDigit = defineComponent({
       </Row>
     );
   },
-});
+  {
+    name: "FieldDigst",
+    props: {
+      value: { type: Array, default: () => [] },
+    },
+    emits: {
+      "update:value": (v) => Array.isArray(v),
+    },
+  },
+);
 
-const TypeField = defineComponent({
-  name: "TypeField",
-  props: {
-    type: { type: String, required: true },
-    name: { type: String, required: true },
-    value: { type: [String, Number, Array], default: () => void 0 },
-    dict: { type: Array, default: () => [] },
-  },
-  emits: {
-    "update:value": () => true,
-  },
-  setup(props, { emit }) {
+const TypeField = defineComponent(
+  (props, { emit }) => {
     const value = ref(void 0);
 
     watch(
@@ -94,24 +86,22 @@ const TypeField = defineComponent({
       return <Input modelValue={value.value} onUpdate:modelValue={onUpdate} placeholder="请输入" />;
     };
   },
-});
-
-export const QQuery = defineComponent({
-  name: "QQuery",
-
-  props: {
-    loading: { type: Boolean, default: false },
-    columns: { type: Array, required: true },
-    form: { type: Object, required: true },
-    dicts: { type: Object, default: () => ({}) },
+  {
+    name: "TypeField",
+    props: {
+      type: { type: String, required: true },
+      name: { type: String, required: true },
+      value: { type: [String, Number, Array], default: () => void 0 },
+      dict: { type: Array, default: () => [] },
+    },
+    emits: {
+      "update:value": () => true,
+    },
   },
+);
 
-  emits: {
-    query: () => true,
-    reload: () => true,
-  },
-
-  setup(props, { emit }) {
+export const QQuery = defineComponent(
+  (props, { emit }) => {
     const cols = ref([]);
 
     watch(
@@ -187,4 +177,19 @@ export const QQuery = defineComponent({
       </Form>
     );
   },
-});
+  {
+    name: "QQuery",
+
+    props: {
+      loading: { type: Boolean, default: false },
+      columns: { type: Array, required: true },
+      form: { type: Object, required: true },
+      dicts: { type: Object, default: () => ({}) },
+    },
+
+    emits: {
+      query: () => true,
+      reload: () => true,
+    },
+  },
+);

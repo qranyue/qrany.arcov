@@ -22,7 +22,7 @@ interface FieldDigit {
   query?: FieldDigestQuery;
 }
 
-interface FieldSelectProps {
+interface FieldSelectField {
   options?: [number | string, string][];
 }
 interface FieldSelectQuery {
@@ -31,11 +31,11 @@ interface FieldSelectQuery {
 }
 interface FieldSelect {
   type?: "select";
-  props?: FieldSelectProps;
+  field?: FieldSelectField;
   query?: FieldSelectQuery;
 }
 
-interface FieldCascaderProps<k = number | string> {
+interface FieldCascaderField<k = number | string> {
   options?: [k, string, k?][];
 }
 interface FieldCascaderQuery<k = number | string> {
@@ -44,7 +44,7 @@ interface FieldCascaderQuery<k = number | string> {
 }
 interface FieldCascader {
   type?: "cascader";
-  props?: FieldCascaderProps;
+  field?: FieldCascaderField;
   query?: FieldCascaderQuery;
 }
 
@@ -57,13 +57,23 @@ interface FieldRangePicker {
   query?: FieldRangePickerQuery;
 }
 
+interface FieldImage {
+  type?: "image";
+}
+
+interface FieldImages {
+  type?: "images";
+}
+
 interface Column {
   key: string;
   title: string;
   tip?: string;
   width?: number;
+  minWidth?: number;
+  ellipsis?: number;
   align?: "left" | "center" | "right";
   sorter?: boolean;
 }
 
-export type QColumn = Column & (FieldText | FieldNumber | FieldDigit | FieldSelect | FieldCascader | FieldRangePicker);
+export type QColumn = Column & (FieldText | FieldNumber | FieldDigit | FieldSelect | FieldCascader | FieldRangePicker | FieldImage | FieldImages);

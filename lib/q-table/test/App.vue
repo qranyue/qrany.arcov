@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { QTable, type Column, type QTableRequest } from "@/index";
+import { QActions, QTable, type QColumn, type QTableRequest } from "@/index";
+import "@arco-design/web-vue/es/button/style/css";
 
 const select_options: [number, string][] = [
   [0, "ling"],
@@ -34,12 +35,15 @@ const cascader_options: [number, string, number?][] = [
   [330, "三百三十", 300],
 ];
 
-const columns: Column[] = [
+const columns: QColumn[] = [
   { key: "text", title: "Text", type: "text" },
   { key: "number", title: "Number", type: "digit" },
   { key: "select", title: "Select", type: "select", query: { request: async () => select_options } },
   { key: "cascader", title: "Cascader", type: "cascader", query: { request: async () => cascader_options } },
   { key: "date", title: "Date", type: "range-picker" },
+  { key: "image", title: "Image", type: "image" },
+  { key: "images", title: "Images", type: "images" },
+  { key: "action", title: "Action" },
 ];
 
 const request: QTableRequest = () => {
@@ -53,17 +57,24 @@ const request: QTableRequest = () => {
             select: i % 3,
             cascader: (1 + (i % 3)) * 100,
             date: new Date().toLocaleString(),
+            image: "台灯|https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/24e0dd27418d2291b65db1b21aa62254.png~tplv-uwbnlip3yd-webp.webp",
+            images:
+              "城市|https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/cd7a1aaea8e1c5e3d26fe2591e561798.png~tplv-uwbnlip3yd-webp.webp,雪地|https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/6480dbc69be1b5de95010289787d64f1.png~tplv-uwbnlip3yd-webp.webp,冰川|https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/0265a04fddbd77a19602a15d9d55d797.png~tplv-uwbnlip3yd-webp.webp",
           };
         }),
         total: 20,
       });
-    }, 1000);
+    }, 200);
   });
 };
 </script>
 
 <template>
-  <QTable :columns="columns" :request="request"></QTable>
+  <QTable :columns="columns" :request="request">
+    <template #body="{ key }">
+      <QActions v-if="key === 'action'" />
+    </template>
+  </QTable>
 </template>
 
 <style>

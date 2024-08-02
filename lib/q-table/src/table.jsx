@@ -4,8 +4,9 @@ import "@arco-design/web-vue/es/table/style/css";
 import { defineComponent, reactive, watch } from "vue";
 import { useTableContext } from "./hooks";
 import { QQuery } from "./query";
-import { TableRender } from "./render";
-import { get_dicts, is_null, pick } from "./utils";
+import { QRender } from "./render";
+import style from "./table.module.css";
+import { filter_vnodes, is_null, parse_dicts, pick } from "./utils";
 
 const pagination = { showPageSize: true, showTotal: true };
 export const defaultPagination = (config) => {
@@ -14,24 +15,11 @@ export const defaultPagination = (config) => {
 
 const getPagination = (pagi) => ({ ...pagi, ...pagination });
 
-export const QTable = defineComponent({
-  name: "QTable",
-
-  props: {
-    table: { type: Object, default: void 0 },
-    rowKey: { type: [String, Function], default: "id" },
-    columns: { type: Array, required: true },
-    request: { type: Function, required: true },
-
-    params: { type: Object, default: () => ({}) },
-
-    initial: { type: Boolean, default: true },
-  },
-
-  setup(props, { slots }) {
+export const QTable = defineComponent(
+  (props, { slots }) => {
     const [table, ctx] = useTableContext(props.table);
 
-    const other = {};
+    const other = { filter: {}, sorter: {} };
     const data = reactive({
       loading: false,
       sets: [],
@@ -89,13 +77,13 @@ export const QTable = defineComponent({
 
     const set_dicts = async (c) => {
       if (!c.props?.options && !c.query?.request) return;
-      const before = get_dicts(c.props?.options);
+      const before = parse_dicts(c.props?.options);
       dicts.options[c.key] = before.options;
       dicts.filter[c.key] = before.filter;
       dicts.enum[c.key] = before.enum;
       const promise = c.query?.request?.(table.form);
       if (!promise) return;
-      const after = get_dicts(await promise);
+      const after = parse_dicts(await promise);
       dicts.options[c.key] = after.options;
       dicts.filter[c.key] = after.filter;
       dicts.enum[c.key] = after.enum;
@@ -144,7 +132,9 @@ export const QTable = defineComponent({
     const cell$ = ({ record, column }) => {
       const k = column.dataIndex;
       const c = data.cols[k];
-      return slots.body?.({ key: k, record, dicts: dicts.enum }) || <TableRender type={c.type} value={record[k]} dict={dicts.enum[k]} />;
+      let v = slots.body?.({ key: k, record, value: record[k] });
+      if (v && (v = filter_vnodes(v)).length) return v;
+      return <QRender type={c.type} value={record[k]} dict={dicts.enum[k]} />;
     };
 
     const column$ = (k) => {
@@ -160,7 +150,15 @@ export const QTable = defineComponent({
 
     const table$ = () => {
       return (
-        <Table loading={data.loading} data={data.data} pagination={getPagination(pagi)} bordered={false} onPageChange={on_page_change} onPageSizeChange={on_page_size_change}>
+        <Table
+          class={style["q-table"]}
+          loading={data.loading}
+          data={data.data}
+          pagination={getPagination(pagi)}
+          bordered={false}
+          onPageChange={on_page_change}
+          onPageSizeChange={on_page_size_change}
+        >
           {{ columns: columns$ }}
         </Table>
       );
@@ -177,4 +175,18 @@ export const QTable = defineComponent({
       );
     };
   },
-});
+  {
+    name: "QTable",
+
+    props: {
+      table: { type: Object, default: void 0 },
+      rowKey: { type: [String, Function], default: "id" },
+      columns: { type: Array, required: true },
+      request: { type: Function, required: true },
+
+      params: { type: Object, default: () => ({}) },
+
+      initial: { type: Boolean, default: true },
+    },
+  },
+);

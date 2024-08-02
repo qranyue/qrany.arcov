@@ -1,0 +1,4 @@
+.q-table:global(.arco-table .arco-table-th),
+.q-table:global(.arco-table .arco-table-td) {
+  white-space: nowrap;
+}
