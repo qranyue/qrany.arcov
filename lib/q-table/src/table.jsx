@@ -1,11 +1,14 @@
-import { Card, Table, TableColumn } from "@arco-design/web-vue";
+import { Card, Col, Row, Space, Table, TableColumn } from "@arco-design/web-vue";
 import "@arco-design/web-vue/es/card/style/css";
+import "@arco-design/web-vue/es/grid/style/css";
 import "@arco-design/web-vue/es/table/style/css";
 import { defineComponent, reactive, watch } from "vue";
 import { useTableContext } from "./hooks";
 import { QQuery } from "./query";
 import { QRender } from "./render";
+import { QSets } from "./sets";
 import style from "./table.module.css";
+import { QTips } from "./tips";
 import { filter_vnodes, is_null, parse_dicts, pick } from "./utils";
 
 const pagination = { showPageSize: true, showTotal: true };
@@ -121,6 +124,27 @@ export const QTable = defineComponent(
       { immediate: true },
     );
 
+    const query$ = () => {
+      return <QQuery loading={data.loading} columns={props.columns} form={table.form} dicts={dicts.options} onQuery={query} onReload={reload} />;
+    };
+
+    const sets$ = () => {
+      return (
+        <Row class={style["q-table-sets"]} align="center" justify="end">
+          <Col flex="none">
+            <Space>{slots.actions?.()}</Space>
+          </Col>
+          <Col flex="none">
+            <QSets cols={data.sets} sorts={data.sorts} />
+          </Col>
+        </Row>
+      );
+    };
+
+    const tips$ = () => {
+      return <QTips selected={table.selectedKeys.length} />;
+    };
+
     const on_page_change = (page) => {
       query(page);
     };
@@ -150,27 +174,31 @@ export const QTable = defineComponent(
 
     const table$ = () => {
       return (
-        <Table
-          class={style["q-table"]}
-          loading={data.loading}
-          data={data.data}
-          pagination={getPagination(pagi)}
-          bordered={false}
-          onPageChange={on_page_change}
-          onPageSizeChange={on_page_size_change}
-        >
-          {{ columns: columns$ }}
-        </Table>
+        <>
+          {tips$()}
+          <Table
+            class={style["q-table"]}
+            loading={data.loading}
+            data={data.data}
+            pagination={getPagination(pagi)}
+            bordered={false}
+            onPageChange={on_page_change}
+            onPageSizeChange={on_page_size_change}
+          >
+            {{ columns: columns$ }}
+          </Table>
+        </>
       );
     };
 
     return () => {
       return (
         <>
-          <Card>
-            <QQuery loading={data.loading} columns={props.columns} form={table.form} dicts={dicts.options} onQuery={query} onReload={reload} />
+          <Card>{query$()}</Card>
+          <Card style={{ "margin-top": "24px" }}>
+            {sets$()}
+            {table$()}
           </Card>
-          <Card style={{ "margin-top": "24px" }}>{table$()}</Card>
         </>
       );
     };

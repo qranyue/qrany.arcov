@@ -1,3 +1,11 @@
+.q-table-sets {
+  margin-bottom: 12px;
+}
+
+.q-table {
+  margin-top: 12px;
+}
+
 .q-table:global(.arco-table .arco-table-th),
 .q-table:global(.arco-table .arco-table-td) {
   white-space: nowrap;
