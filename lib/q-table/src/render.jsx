@@ -1,11 +1,12 @@
-import { Dropdown, Image, ImagePreviewGroup, Space, Tooltip } from "@arco-design/web-vue";
+import { Button, Doption, Dropdown, Image, ImagePreviewGroup, Space, Tooltip } from "@arco-design/web-vue";
 import "@arco-design/web-vue/es/button/style/css";
 import "@arco-design/web-vue/es/dropdown/style/css";
 import "@arco-design/web-vue/es/image/style/css";
 import "@arco-design/web-vue/es/space/style/css";
 import "@arco-design/web-vue/es/tooltip/style/css";
-import { computed, defineComponent } from "vue";
-import { digit, parse_images } from "./utils";
+import { cloneVNode, computed, defineComponent } from "vue";
+import style from "./render.module.css";
+import { digit, filter_vnodes, parse_images } from "./utils";
 
 const QImage = defineComponent(
   (props) => {
@@ -55,13 +56,34 @@ const QImages = defineComponent(
   },
 );
 
+const QEllipsis = defineComponent(
+  (props) => {
+    return () => {
+      return (
+        <Tooltip content={`${props.value}`}>
+          <div class={style["q-ellipsis"]} style={{ "-webkit-line-clamp": props.ellipsis }}>{`${props.value}`}</div>
+        </Tooltip>
+      );
+    };
+  },
+  {
+    name: "QranyEllipsis",
+    props: {
+      value: { type: [String, Number], default: () => void 0 },
+      ellipsis: { type: Number, default: 0 },
+    },
+  },
+);
+
 export const QRender = defineComponent(
   (props) => {
     return () => {
       if (props.type === "image") return <QImage value={props.value} />;
       if (props.type === "images") return <QImages value={props.value} />;
-      if (/number|digit/.test(props.type)) return digit(props.value);
-      return props.dict[props.value] || props.value;
+      let v = props.value;
+      if (/number|digit/.test(props.type)) v = digit(props.value);
+      if (props.ellipsis) return <QEllipsis value={v} ellipsis={props.ellipsis} />;
+      return v;
     };
   },
   {
@@ -70,7 +92,30 @@ export const QRender = defineComponent(
     props: {
       type: { type: String, default: "text" },
       value: { type: [String, Number], default: () => void 0 },
-      dict: { type: Object, default: () => ({}) },
+      ellipsis: { type: Number, default: 0 },
+    },
+  },
+);
+
+export const QAction = defineComponent(
+  (props, { emit, slots }) => {
+    const onClick = () => emit("click");
+    return () => {
+      if (props.type === "doption") return <Doption onClick={onClick}>{slots.default?.()}</Doption>;
+      return (
+        <Button type={props.type} onClick={onClick}>
+          {slots.default?.()}
+        </Button>
+      );
+    };
+  },
+  {
+    name: "QranyAction",
+    props: {
+      type: { type: String, default: "secondary" },
+    },
+    emits: {
+      click: () => true,
     },
   },
 );
@@ -83,11 +128,11 @@ export const QActions = defineComponent(
           更多 <IconDown />
         </Button>
       ),
-      content: () => more.map((x) => <Doption>{x}</Doption>),
+      content: () => more.map((x) => cloneVNode(x, { type: "doption" })),
     });
 
     return () => {
-      const c = slots.default?.();
+      const c = filter_vnodes(slots.default?.());
       if (!c) return c;
       if (!c.length) return c;
       if (c.length === 1) return c[0];

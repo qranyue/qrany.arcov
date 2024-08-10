@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { QActions, QTable, type QColumn, type QTableRequest } from "@/index";
+import { QAction } from "@/render";
+import { Message } from "@arco-design/web-vue";
 import "@arco-design/web-vue/es/button/style/css";
+import "@arco-design/web-vue/es/message/style/css";
 
 const select_options: [number, string][] = [
   [0, "ling"],
@@ -36,14 +39,14 @@ const cascader_options: [number, string, number?][] = [
 ];
 
 const columns: QColumn[] = [
-  { key: "text", title: "Text", type: "text" },
+  { key: "text", title: "Text", type: "text", width: 200, ellipsis: 3 },
   { key: "number", title: "Number", type: "digit" },
-  { key: "select", title: "Select", type: "select", query: { request: async () => select_options } },
-  { key: "cascader", title: "Cascader", type: "cascader", query: { request: async () => cascader_options } },
+  { key: "select", title: "Select", type: "select", request: async () => select_options },
+  { key: "cascader", title: "Cascader", type: "cascader", request: async () => cascader_options },
   { key: "date", title: "Date", type: "range-picker" },
   { key: "image", title: "Image", type: "image" },
   { key: "images", title: "Images", type: "images" },
-  { key: "action", title: "Action" },
+  { key: "action", title: "Action", fixed: "right" },
 ];
 
 const request: QTableRequest = () => {
@@ -71,8 +74,15 @@ const request: QTableRequest = () => {
 
 <template>
   <QTable :columns="columns" :request="request">
-    <template #body="{ key }">
-      <QActions v-if="key === 'action'" />
+    <template #body="{ key, record }">
+      <QActions v-if="key === 'action'">
+        <QAction v-if="record.select === 0" type="primary" @click="Message.success('操作1')">操作1</QAction>
+        <QAction v-if="record.select === 1" type="outline" @click="Message.success('操作2')">操作2</QAction>
+        <QAction v-if="record.select === 2" @click="Message.success('操作3')">操作3</QAction>
+        <QAction v-if="record.select === 0" @click="Message.success('操作4')">操作4</QAction>
+        <QAction @click="Message.success('操作5')">操作5</QAction>
+        <QAction @click="Message.success('操作6')">操作6</QAction>
+      </QActions>
     </template>
   </QTable>
 </template>

@@ -79,12 +79,12 @@ export const QTable = defineComponent(
     });
 
     const set_dicts = async (c) => {
-      if (!c.props?.options && !c.query?.request) return;
+      if (!c.options && !c.request) return;
       const before = parse_dicts(c.props?.options);
       dicts.options[c.key] = before.options;
       dicts.filter[c.key] = before.filter;
       dicts.enum[c.key] = before.enum;
-      const promise = c.query?.request?.(table.form);
+      const promise = c.request?.(table.form);
       if (!promise) return;
       const after = parse_dicts(await promise);
       dicts.options[c.key] = after.options;
@@ -97,10 +97,10 @@ export const QTable = defineComponent(
       (v) => {
         const [sets, sorts, cols, def] = [[], [], {}, {}];
         for (const c of v) {
-          const x = pick(c, "key", "title", "type", "width", "minWidth", "align", "fixed");
+          const x = pick(c, "key", "title", "type", "width", "minWidth", "align", "fixed", "ellipsis");
           set_dicts(c);
           if (c.hide === true) continue;
-          if (!is_null(c.query?.default)) def[c.key] = c.query.default;
+          if (!is_null(c.default)) def[c.key] = c.default;
           if (c.sorter) x.sortable = { sorter: c.sorter };
           cols[x.key] = x;
           sets.push([x.key, x.title]);
@@ -158,7 +158,7 @@ export const QTable = defineComponent(
       const c = data.cols[k];
       let v = slots.body?.({ key: k, record, value: record[k] });
       if (v && (v = filter_vnodes(v)).length) return v;
-      return <QRender type={c.type} value={record[k]} dict={dicts.enum[k]} />;
+      return dicts.enum[k]?.[record[k]] || <QRender type={c.type} ellipsis={c.ellipsis} value={record[k]} />;
     };
 
     const column$ = (k) => {

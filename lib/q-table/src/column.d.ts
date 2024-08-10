@@ -1,60 +1,31 @@
-interface FieldTextQuery {
-  default?: string;
-}
 interface FieldText {
   type?: "text";
-  query?: FieldTextQuery;
+  default?: string;
 }
 
-interface FieldNumberQuery {
-  default?: number | string;
-}
 interface FieldNumber {
   type?: "number";
-  query?: FieldNumberQuery;
+  default?: number | "";
 }
 
-interface FieldDigestQuery {
-  default?: [number | string, number | string];
-}
-interface FieldDigit {
+interface FieldDigit<K = number | ""> {
   type?: "digit";
-  query?: FieldDigestQuery;
+  default?: [K, K];
 }
 
-interface FieldSelectField {
-  options?: [number | string, string][];
-}
-interface FieldSelectQuery {
-  default?: string | number | string[] | number[];
-  request?: (form: Record<string, unknown>) => Promise<[number | string, string][]>;
-}
 interface FieldSelect {
   type?: "select";
-  field?: FieldSelectField;
-  query?: FieldSelectQuery;
+  default?: string | number | string[] | number[];
 }
 
-interface FieldCascaderField<k = number | string> {
-  options?: [k, string, k?][];
-}
-interface FieldCascaderQuery<k = number | string> {
-  default?: string | number | string[] | number[];
-  request?: (form: Record<string, unknown>) => Promise<[k, string, k?][]>;
-}
 interface FieldCascader {
   type?: "cascader";
-  field?: FieldCascaderField;
-  query?: FieldCascaderQuery;
+  default?: string | number | string[] | number[];
 }
 
-interface FieldRangePickerQuery {}
-interface FieldRangePickerQuery {
-  default?: [string, string];
-}
 interface FieldRangePicker {
   type?: "range-picker";
-  query?: FieldRangePickerQuery;
+  default?: [string, string];
 }
 
 interface FieldImage {
@@ -65,7 +36,7 @@ interface FieldImages {
   type?: "images";
 }
 
-interface Column {
+interface Column<k = string | number> {
   key: string;
   title: string;
   tip?: string;
@@ -73,6 +44,9 @@ interface Column {
   minWidth?: number;
   ellipsis?: number;
   align?: "left" | "center" | "right";
+  fixed?: "center" | "right";
+  options?: [k, string, k?][];
+  request?: (form: Record<string, unknown>) => Promise<[k, string, k?][]>;
   sorter?: boolean;
 }
 

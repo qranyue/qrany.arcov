@@ -47,7 +47,7 @@ interface QTableProps {
 }
 
 interface QTableSlots {
-  body?: Slot<{ key: string; record: unknown; value: unknown }>;
+  body?: Slot<{ key: string; record: Record<string, unknown>; value: unknown }>;
 }
 
 export const QTable: DefineSetupFnComponent<QTableProps, {}, SlotsType<QTableSlots>>;
