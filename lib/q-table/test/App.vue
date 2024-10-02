@@ -2,8 +2,8 @@
 import { QActions, QTable, type QColumn, type QTableRequest } from "@/index";
 import { QAction } from "@/render";
 import { Message } from "@arco-design/web-vue";
-import "@arco-design/web-vue/es/button/style/css";
-import "@arco-design/web-vue/es/message/style/css";
+import "@arco-design/web-vue/es/button/style/index";
+import "@arco-design/web-vue/es/message/style/index";
 
 const select_options: [number, string][] = [
   [0, "ling"],

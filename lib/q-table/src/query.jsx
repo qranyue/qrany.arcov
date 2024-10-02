@@ -9,6 +9,7 @@ import IconUp from "@arco-design/web-vue/es/icon/icon-up";
 import "@arco-design/web-vue/es/input-number/style/css";
 import "@arco-design/web-vue/es/input/style/css";
 import { defineComponent, ref, watch } from "vue";
+import { getForm, pushForm } from "./config";
 import { useTableProvide } from "./hooks";
 import { pick } from "./utils";
 
@@ -59,46 +60,16 @@ const FieldDigit = defineComponent(
   },
 );
 
-const TypeField = defineComponent(
-  (props, { emit }) => {
-    const value = ref(void 0);
+pushForm({
+  number: ({ value, onUpdate }) => <InputNumber modelValue={value} onUpdate:modelValue={onUpdate} allowClear placeholder="请输入" />,
+  digit: ({ value, onUpdate }) => <FieldDigit value={value} onUpdate:value={onUpdate} placeholder="请输入" />,
+  select: ({ value, onUpdate, dict }) => <Select modelValue={value} onUpdate:modelValue={onUpdate} options={dict} allowClear placeholder="请选择" />,
+  cascader: ({ value, onUpdate, dict }) => <Cascader modelValue={value} onUpdate:modelValue={onUpdate} options={dict} allowClear placeholder="请选择" />,
+  "range-picker": ({ value, onUpdate }) => <RangePicker modelValue={value} onUpdate:modelValue={onUpdate} />,
+  text: ({ value, onUpdate }) => <Input modelValue={value} onUpdate:modelValue={onUpdate} placeholder="请输入" />,
+});
 
-    watch(
-      () => props.value,
-      (v) => {
-        if (JSON.stringify(value.value) === JSON.stringify(v)) return;
-        value.value = v;
-      },
-      { immediate: true },
-    );
-
-    const onUpdate = (v) => {
-      value.value = v;
-      emit("update:value", { [props.name]: v });
-    };
-
-    return () => {
-      if (props.type === "number") return <InputNumber modelValue={value.value} onUpdate:modelValue={onUpdate} allowClear placeholder="请输入" />;
-      if (props.type === "digit") return <FieldDigit value={value.value} onUpdate:value={onUpdate} placeholder="请输入" />;
-      if (props.type === "select") return <Select modelValue={value.value} onUpdate:modelValue={onUpdate} options={props.dict} allowClear placeholder="请选择" />;
-      if (props.type === "cascader") return <Cascader modelValue={value.value} onUpdate:modelValue={onUpdate} options={props.dict} allowClear placeholder="请选择" />;
-      if (props.type === "range-picker") return <RangePicker modelValue={value.value} onUpdate:modelValue={onUpdate} />;
-      return <Input modelValue={value.value} onUpdate:modelValue={onUpdate} placeholder="请输入" />;
-    };
-  },
-  {
-    name: "TypeField",
-    props: {
-      type: { type: String, required: true },
-      name: { type: String, required: true },
-      value: { type: [String, Number, Array], default: () => void 0 },
-      dict: { type: Array, default: () => [] },
-    },
-    emits: {
-      "update:value": () => true,
-    },
-  },
-);
+const RENDERS = getForm();
 
 export const QQuery = defineComponent(
   (props, { emit }) => {
@@ -109,7 +80,7 @@ export const QQuery = defineComponent(
       (v) => {
         const now = [];
         for (const c of v) {
-          if (!/text|number|digit|range-picker|select|cascader/.test(c.type)) continue;
+          if (!(c.type in RENDERS)) continue;
           const x = pick(c, "key", "title", "type");
           now.push(x);
         }
@@ -120,11 +91,13 @@ export const QQuery = defineComponent(
 
     const ctx = useTableProvide();
 
+    const onUpdate = () => {};
+
     const cols$ = (x) => {
       return (
         <GridItem key={x.key}>
           <FormItem field={x.key} label={x.title}>
-            <TypeField name={x.key} type={x.type} value={props.form[x.key]} dict={props.dicts[x.key]} onUpdate:value={ctx.form} />
+            {RENDERS[x.type]({ value: ctx.form[x.key], onUpdate })}
           </FormItem>
         </GridItem>
       );

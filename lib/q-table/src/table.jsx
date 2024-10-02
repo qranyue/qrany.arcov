@@ -3,9 +3,10 @@ import "@arco-design/web-vue/es/card/style/css";
 import "@arco-design/web-vue/es/grid/style/css";
 import "@arco-design/web-vue/es/table/style/css";
 import { defineComponent, reactive, watch } from "vue";
+import { getRender } from "./config";
 import { useTableContext } from "./hooks";
 import { QQuery } from "./query";
-import { QRender } from "./render";
+import { QEllipsis } from "./render";
 import { QSets } from "./sets";
 import style from "./table.module.css";
 import { QTips } from "./tips";
@@ -17,6 +18,8 @@ export const defaultPagination = (config) => {
 };
 
 const getPagination = (pagi) => ({ ...pagi, ...pagination });
+
+const RENDERS = getRender();
 
 export const QTable = defineComponent(
   (props, { slots }) => {
@@ -158,7 +161,11 @@ export const QTable = defineComponent(
       const c = data.cols[k];
       let v = slots.body?.({ key: k, record, value: record[k] });
       if (v && (v = filter_vnodes(v)).length) return v;
-      return dicts.enum[k]?.[record[k]] || <QRender type={c.type} ellipsis={c.ellipsis} value={record[k]} />;
+      v = record[k];
+      if (dicts.enum[k]) v = dicts.enum[k]?.[v];
+      if (RENDERS[c.type]) return RENDERS[c.type]({ value: v });
+      if (c.ellipsis) return <QEllipsis ellipsis={c.ellipsis} value={v} />;
+      return v;
     };
 
     const column$ = (k) => {

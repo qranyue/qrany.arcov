@@ -5,6 +5,7 @@ import "@arco-design/web-vue/es/image/style/css";
 import "@arco-design/web-vue/es/space/style/css";
 import "@arco-design/web-vue/es/tooltip/style/css";
 import { cloneVNode, computed, defineComponent } from "vue";
+import { pushRender } from "./config";
 import style from "./render.module.css";
 import { digit, filter_vnodes, parse_images } from "./utils";
 
@@ -56,7 +57,7 @@ const QImages = defineComponent(
   },
 );
 
-const QEllipsis = defineComponent(
+export const QEllipsis = defineComponent(
   (props) => {
     return () => {
       return (
@@ -69,30 +70,8 @@ const QEllipsis = defineComponent(
   {
     name: "QranyEllipsis",
     props: {
-      value: { type: [String, Number], default: () => void 0 },
-      ellipsis: { type: Number, default: 0 },
-    },
-  },
-);
-
-export const QRender = defineComponent(
-  (props) => {
-    return () => {
-      if (props.type === "image") return <QImage value={props.value} />;
-      if (props.type === "images") return <QImages value={props.value} />;
-      let v = props.value;
-      if (/number|digit/.test(props.type)) v = digit(props.value);
-      if (props.ellipsis) return <QEllipsis value={v} ellipsis={props.ellipsis} />;
-      return v;
-    };
-  },
-  {
-    name: "QranyRender",
-
-    props: {
-      type: { type: String, default: "text" },
-      value: { type: [String, Number], default: () => void 0 },
-      ellipsis: { type: Number, default: 0 },
+      value: { type: [String, Number], required: true },
+      ellipsis: { type: Number, default: 2 },
     },
   },
 );
@@ -150,3 +129,10 @@ export const QActions = defineComponent(
     name: "QranyActions",
   },
 );
+
+pushRender({
+  image: ({ value }) => <QImage value={value} />,
+  images: ({ value }) => <QImages value={value} />,
+  number: ({ value }) => digit(value),
+  digit: ({ value }) => digit(value),
+});
