@@ -1,9 +1,9 @@
-<script setup lang="ts" generic="F extends FormData">
+<script setup lang="ts" generic="F extends QFormData">
 import Form from "@arco-design/web-vue/es/form/form";
 import Space from "@arco-design/web-vue/es/space/space";
-import { nextTick, reactive, shallowRef, useTemplateRef, type Reactive } from "vue";
+import { nextTick, reactive, shallowRef, useTemplateRef } from "vue";
 
-import { useFormItemProvide, useFormState, type FormData, type UseForm } from "./use";
+import { useFormItemProvide, useFormState, type QFormData, type UseForm } from "./use";
 import { tryPromise } from "../utils";
 
 interface QFormProps {
@@ -15,7 +15,7 @@ interface QFormProps {
 const { form, request } = defineProps<QFormProps>();
 
 interface QFormEmits {
-  (event: "submit", payload: Reactive<F>): void;
+  (event: "submit", payload: F): void;
 }
 
 const $emit = defineEmits<QFormEmits>();
@@ -72,13 +72,16 @@ useFormItemProvide({
   },
 });
 
-const onSubmit = () => $emit("submit", data);
+const onSubmit = () => $emit("submit", { ...data } as F);
 
 (async () => {
   if (!request) return;
   loading.value = true;
   const [value] = await tryPromise(request());
-  if (value) register.fields(value);
+  if (value) {
+    for (const [k, v] of Object.entries(value)) if (keys.has(k)) initial[k as keyof F] = v as F[keyof F];
+    register.fields(value);
+  }
   loading.value = false;
 })();
 </script>

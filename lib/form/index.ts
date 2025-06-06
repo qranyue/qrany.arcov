@@ -4,4 +4,5 @@ export { default as QFormItem } from "./QFormItem.vue";
 export { default as QFormText } from "./QFormText.vue";
 export { default as QFormTextArea } from "./QFormTextArea.vue";
 
+export type { QFormData } from "./use";
 export { useForm } from "./use";

@@ -3,11 +3,11 @@ import { customRef, inject, provide, watchEffect, type InjectionKey, type Reacti
 
 const FORM = Symbol();
 
-export type FormData = Record<string, unknown>;
+export type QFormData = Record<string, unknown>;
 
-const FORM_DATA = Symbol() as InjectionKey<Reactive<FormData>>;
+const FORM_DATA = Symbol() as InjectionKey<Reactive<QFormData>>;
 
-interface UseFormStateParam<T extends FormData> {
+interface UseFormStateParam<T extends QFormData> {
   clear: () => Promise<void>;
   fields: (data: T) => Promise<void>;
   reset: () => Promise<void>;
@@ -18,17 +18,17 @@ interface UseFormStateParam<T extends FormData> {
   form: () => UseForm<T> | undefined;
 }
 
-export const useFormState = <T extends FormData>(state: UseFormStateParam<T>) => {
+export const useFormState = <T extends QFormData>(state: UseFormStateParam<T>) => {
   const { data, form, ...rest } = state;
   provide(FORM_DATA, data);
   watchEffect(() => form()?.[FORM]?.(rest));
 };
 
-export interface UseForm<T extends FormData> extends Omit<UseFormStateParam<T>, "data" | "form"> {
+export interface UseForm<T extends QFormData> extends Omit<UseFormStateParam<T>, "data" | "form"> {
   [FORM]?: (state: Omit<UseFormStateParam<T>, "data" | "form">) => void;
 }
 
-export const useForm = <T extends FormData>() => {
+export const useForm = <T extends QFormData>() => {
   type UF = Omit<UseForm<T>, typeof FORM>;
   let es: [string, never[], (value: never) => void][] | void;
   const ev = (type: string, data: never[]) => {
@@ -93,7 +93,7 @@ export const useFormItemInject = <T>(get: () => string) => {
       return data[get()] as T;
     },
     set: (v: T) => {
-      i?.update(get() as keyof FormData, v);
+      i?.update(get() as keyof QFormData, v);
       trigger();
     },
   }));
