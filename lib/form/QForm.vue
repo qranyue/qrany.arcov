@@ -47,7 +47,7 @@ const onSubmit = () => $emit("submit", data);
   if (!request) return;
   loading.value = true;
   const [value] = await tryPromise(request());
-  if (value) Object.assign(data, value);
+  if (value) for (const k in value) if (keys.has(k)) (data as F)[k] = value[k];
   loading.value = false;
 })();
 </script>
