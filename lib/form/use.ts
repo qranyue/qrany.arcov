@@ -1,65 +1,63 @@
-import { type FormInstance } from "@arco-design/web-vue";
-import { customRef, inject, nextTick, provide, watchEffect, type InjectionKey, type Reactive, type ShallowRef } from "vue";
+import type { ValidatedError } from "@arco-design/web-vue/es/form/interface";
+import { customRef, inject, provide, watchEffect, type InjectionKey, type Reactive } from "vue";
 
 const FORM = Symbol();
 
-type FormRef = Readonly<ShallowRef<FormInstance>>;
-
 export type FormData = Record<string, unknown>;
-
-type FormState<T> = (ref: FormRef, keys: Set<string>, data: Reactive<T>) => void;
-
-export interface UseForm<T extends FormData> {
-  clear: () => Promise<void>;
-  fields: (data: T) => Promise<void>;
-  reset: () => Promise<void>;
-  validate: () => Promise<void>;
-  validates: (name?: keyof T | (keyof T)[]) => Promise<void>;
-
-  [FORM]: FormState<T>;
-}
-
-export const useForm = <T extends FormData>() => {
-  let ks: Set<string>;
-  let $ref: FormRef;
-  let value: Reactive<T>;
-  const form = {
-    clear: async () => {
-      await nextTick();
-      await $ref.value.clearValidate();
-    },
-    fields: async (data) => {
-      await nextTick();
-      for (const [k, v] of Object.entries(data)) {
-        if (ks.has(k)) (value as T)[k as keyof T] = v as T[keyof T];
-      }
-    },
-    reset: async () => {
-      await nextTick();
-      for (const k in value) delete value[k];
-    },
-    validate: async () => {
-      await nextTick();
-      await $ref.value.validate();
-    },
-    validates: async (name) => {
-      await nextTick();
-      await $ref.value.validateField(name);
-    },
-    [FORM]: (ref, keys, data) => {
-      $ref = ref;
-      value = data;
-      ks = keys;
-    },
-  } as UseForm<T>;
-  return form;
-};
 
 const FORM_DATA = Symbol() as InjectionKey<Reactive<FormData>>;
 
-export const useFormState = <T extends FormData>($ref: FormRef, keys: Set<string>, data: Reactive<T>, form: () => UseForm<T> | undefined) => {
+interface UseFormStateParam<T extends FormData> {
+  clear: () => Promise<void>;
+  fields: (data: T) => Promise<void>;
+  reset: () => Promise<void>;
+  validate: () => Promise<Record<string, ValidatedError> | undefined>;
+  validates: (name: keyof T | (keyof T)[]) => Promise<Record<string, ValidatedError> | undefined>;
+
+  data: Reactive<T>;
+  form: () => UseForm<T> | undefined;
+}
+
+export const useFormState = <T extends FormData>(state: UseFormStateParam<T>) => {
+  const { data, form, ...rest } = state;
   provide(FORM_DATA, data);
-  watchEffect(() => form()?.[FORM]($ref, keys, data));
+  watchEffect(() => form()?.[FORM]?.(rest));
+};
+
+export interface UseForm<T extends FormData> extends Omit<UseFormStateParam<T>, "data" | "form"> {
+  [FORM]?: (state: Omit<UseFormStateParam<T>, "data" | "form">) => void;
+}
+
+export const useForm = <T extends FormData>() => {
+  type UF = Omit<UseForm<T>, typeof FORM>;
+  let es: [string, never[], (value: never) => void][] | void;
+  const ev = (type: string, data: never[]) => {
+    return new Promise<never>((resolve) => {
+      es ??= [];
+      es?.push([type, data, resolve]);
+    });
+  };
+  const form = {
+    clear: () => ev("clear", []),
+    fields: (data) => ev("fields", [data as never]),
+    reset: () => ev("reset", []),
+    validate: () => ev("validate", []),
+    validates: (name) => ev("validates", [name as never]),
+    [FORM]: (state) => {
+      form.clear = state.clear;
+      form.fields = state.fields;
+      form.reset = state.reset;
+      form.validate = state.validate;
+      form.validates = state.validates;
+      for (const [type, data, resolve] of es ?? []) {
+        const fn = state[type as keyof UF] as (...data: never[]) => Promise<never>;
+        (async () => resolve(await fn(...data)))();
+      }
+      es = void 0;
+      delete form[FORM];
+    },
+  } as UseForm<T>;
+  return form;
 };
 
 interface FormItemProvide {

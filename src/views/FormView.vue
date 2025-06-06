@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Input } from "@arco-design/web-vue";
-import { QForm, QFormDigit, QFormItem, QFormText } from "../../lib/form";
+import { Button, Input } from "@arco-design/web-vue";
+import { QForm, QFormDigit, QFormItem, QFormText, QFormTextArea } from "../../lib/form";
 </script>
 
 <template>
@@ -10,5 +10,10 @@ import { QForm, QFormDigit, QFormItem, QFormText } from "../../lib/form";
     </QFormItem>
     <QFormText name="name" label="Name" />
     <QFormDigit name="digit" label="Digit" />
+    <QFormTextArea name="text" label="Text" />
+
+    <template #footer>
+      <Button html-type="reset">重置</Button>
+    </template>
   </QForm>
 </template>
