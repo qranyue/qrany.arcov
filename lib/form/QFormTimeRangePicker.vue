@@ -5,7 +5,7 @@ import type { FieldRule } from "@arco-design/web-vue/es/form/interface";
 
 import { useFormItemInject } from "./use";
 
-interface QFormInputProps {
+interface QFormTimeRangePickerProps {
   name: string;
   label: string;
   placeholder?: string;
@@ -18,7 +18,7 @@ interface QFormInputProps {
   format?: string;
 }
 
-const { name } = defineProps<QFormInputProps>();
+const { name } = defineProps<QFormTimeRangePickerProps>();
 
 const value = useFormItemInject(() => name);
 </script>

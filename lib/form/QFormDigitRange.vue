@@ -8,7 +8,7 @@ import { computed } from "vue";
 
 import { useFormItemInject } from "./use";
 
-interface QFormInputProps {
+interface QFormDigitRangeProps {
   name: string;
   label: string;
   tooltip?: string;
@@ -18,7 +18,7 @@ interface QFormInputProps {
   rules?: FieldRule | FieldRule[];
 }
 
-const { name } = defineProps<QFormInputProps>();
+const { name } = defineProps<QFormDigitRangeProps>();
 
 const value = useFormItemInject<[number, number]>(() => name);
 

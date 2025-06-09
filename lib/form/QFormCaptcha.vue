@@ -9,7 +9,7 @@ import { shallowRef } from "vue";
 import { useFormItemInject } from "./use";
 import { tryPromise } from "../utils";
 
-interface QFormInputProps {
+interface QFormCaptchaProps {
   name: string;
   label: string;
   placeholder?: string;
@@ -24,7 +24,7 @@ interface QFormInputProps {
   text?: (time: number) => string;
 }
 
-const { name, getCaptcha, count, text } = defineProps<QFormInputProps>();
+const { name, getCaptcha, count, text } = defineProps<QFormCaptchaProps>();
 
 const value = useFormItemInject<string>(() => name);
 

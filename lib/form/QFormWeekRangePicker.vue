@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import FormItem from "@arco-design/web-vue/es/form/form-item";
-import Picker from "@arco-design/web-vue/es/date-picker/picker";
+import RangePicker from "@arco-design/web-vue/es/date-picker/range-picker";
 import type { FieldRule } from "@arco-design/web-vue/es/form/interface";
 
 import { useFormItemInject } from "./use";
 
-interface QFormWeekPickerProps {
+interface QFormWeekRangePickerProps {
   name: string;
   label: string;
   placeholder?: string;
@@ -16,13 +16,13 @@ interface QFormWeekPickerProps {
   rules?: FieldRule | FieldRule[];
 }
 
-const { name } = defineProps<QFormWeekPickerProps>();
+const { name } = defineProps<QFormWeekRangePickerProps>();
 
 const value = useFormItemInject(() => name);
 </script>
 
 <template>
   <FormItem :field="name" :label="label" :tooltip="tooltip" :disabled="disabled" :help="help" :extra="extra" :rules="rules">
-    <Picker mode="week" v-model="value" :placeholder="placeholder" allow-clear style="flex: auto"></Picker>
+    <RangePicker mode="week" v-model="value" :placeholder="placeholder" allow-clear style="flex: auto"></RangePicker>
   </FormItem>
 </template>

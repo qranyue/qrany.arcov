@@ -18,6 +18,7 @@ import {
   QFormTimePicker,
   QFormTimeRangePicker,
   QFormWeekPicker,
+  QFormWeekRangePicker,
   QFormYearPicker,
   QFormYearRangePicker,
 } from "../../lib/form";
@@ -116,7 +117,7 @@ const request = async () => {
             <QFormMonthRangePicker name="month-range" label="Month" />
           </Col>
           <Col :span="8">
-            <QFormWeekPicker name="week" label="Week" />
+            <QFormWeekRangePicker name="week" label="Week" />
           </Col>
           <Col :span="8">
             <QFormDateRangePicker name="date-range" label="Date" />

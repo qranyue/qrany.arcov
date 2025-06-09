@@ -17,6 +17,7 @@ export { default as QFormTextArea } from "./QFormTextArea.vue";
 export { default as QFormTimePicker } from "./QFormTimePicker.vue";
 export { default as QFormTimeRangePicker } from "./QFormTimeRangePicker.vue";
 export { default as QFormWeekPicker } from "./QFormWeekPicker.vue";
+export { default as QFormWeekRangePicker } from "./QFormWeekRangePicker.vue";
 export { default as QFormYearPicker } from "./QFormYearPicker.vue";
 export { default as QFormYearRangePicker } from "./QFormYearRangePicker.vue";
 

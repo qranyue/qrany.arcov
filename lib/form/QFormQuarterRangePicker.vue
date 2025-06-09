@@ -5,7 +5,7 @@ import type { FieldRule } from "@arco-design/web-vue/es/form/interface";
 
 import { useFormItemInject } from "./use";
 
-interface QFormInputProps {
+interface QFormQuarterRangePickerProps {
   name: string;
   label: string;
   placeholder?: string;
@@ -16,7 +16,7 @@ interface QFormInputProps {
   rules?: FieldRule | FieldRule[];
 }
 
-const { name } = defineProps<QFormInputProps>();
+const { name } = defineProps<QFormQuarterRangePickerProps>();
 
 const value = useFormItemInject(() => name);
 </script>
