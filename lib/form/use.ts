@@ -1,5 +1,5 @@
 import type { ValidatedError } from "@arco-design/web-vue/es/form/interface";
-import { customRef, inject, provide, watchEffect, type InjectionKey, type Reactive } from "vue";
+import { computed, inject, provide, watchEffect, type InjectionKey, type Reactive } from "vue";
 
 const FORM = Symbol();
 
@@ -85,14 +85,8 @@ export const useFormItemInject = <V>(get: () => string) => {
   });
 
   const data = inject(FORM_DATA, {});
-  return customRef((track, trigger) => ({
-    get: () => {
-      track();
-      return (data as object)[get() as keyof object] as V;
-    },
-    set: (v: V) => {
-      i?.update(get(), v);
-      trigger();
-    },
-  }));
+  return computed({
+    get: () => (data as object)[get() as keyof object] as V,
+    set: (v) => i?.update(get(), v),
+  });
 };

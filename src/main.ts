@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 
 import "@arco-design/web-vue/es/index.css";
+import "./style.css";
 import App from "./App.vue";
 import router from "./router";
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FormItem from "@arco-design/web-vue/es/form/form-item";
-import TextArea from "@arco-design/web-vue/es/textarea/textarea";
+import TimePicker from "@arco-design/web-vue/es/time-picker/time-picker";
 import type { FieldRule } from "@arco-design/web-vue/es/form/interface";
 
 import { useFormItemInject } from "./use";
@@ -14,15 +14,17 @@ interface QFormInputProps {
   help?: string;
   extra?: string;
   rules?: FieldRule | FieldRule[];
+
+  format?: string;
 }
 
 const { name } = defineProps<QFormInputProps>();
 
-const value = useFormItemInject<string>(() => name);
+const value = useFormItemInject(() => name);
 </script>
 
 <template>
   <FormItem :field="name" :label="label" :tooltip="tooltip" :disabled="disabled" :help="help" :extra="extra" :rules="rules">
-    <TextArea v-model="value" :placeholder="placeholder" allow-clear></TextArea>
+    <TimePicker v-model="value" :format="format" :placeholder="placeholder" allow-clear></TimePicker>
   </FormItem>
 </template>
