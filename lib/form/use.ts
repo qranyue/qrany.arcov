@@ -3,11 +3,9 @@ import { customRef, inject, provide, watchEffect, type InjectionKey, type Reacti
 
 const FORM = Symbol();
 
-export type QFormData = Record<string, unknown>;
+const FORM_DATA = Symbol() as InjectionKey<Reactive<object>>;
 
-const FORM_DATA = Symbol() as InjectionKey<Reactive<QFormData>>;
-
-interface UseFormStateParam<T extends QFormData> {
+interface UseFormStateParam<T extends object> {
   clear: () => Promise<void>;
   fields: (data: T) => Promise<void>;
   reset: () => Promise<void>;
@@ -18,17 +16,17 @@ interface UseFormStateParam<T extends QFormData> {
   form: () => UseForm<T> | undefined;
 }
 
-export const useFormState = <T extends QFormData>(state: UseFormStateParam<T>) => {
+export const useFormState = <T extends object>(state: UseFormStateParam<T>) => {
   const { data, form, ...rest } = state;
   provide(FORM_DATA, data);
   watchEffect(() => form()?.[FORM]?.(rest));
 };
 
-export interface UseForm<T extends QFormData> extends Omit<UseFormStateParam<T>, "data" | "form"> {
+export interface UseForm<T extends object> extends Omit<UseFormStateParam<T>, "data" | "form"> {
   [FORM]?: (state: Omit<UseFormStateParam<T>, "data" | "form">) => void;
 }
 
-export const useForm = <T extends QFormData>() => {
+export const useForm = <T extends object>() => {
   type UF = Omit<UseForm<T>, typeof FORM>;
   let es: [string, never[], (value: never) => void][] | void;
   const ev = (type: string, data: never[]) => {
@@ -75,7 +73,7 @@ export const useFormItemProvide = (item: FormItemProvide) => {
   provide(FORM_ITEM, item);
 };
 
-export const useFormItemInject = <T>(get: () => string) => {
+export const useFormItemInject = <V>(get: () => string) => {
   const i = inject(FORM_ITEM);
 
   watchEffect((onCleanup) => {
@@ -90,10 +88,10 @@ export const useFormItemInject = <T>(get: () => string) => {
   return customRef((track, trigger) => ({
     get: () => {
       track();
-      return data[get()] as T;
+      return (data as object)[get() as keyof object] as V;
     },
-    set: (v: T) => {
-      i?.update(get() as keyof QFormData, v);
+    set: (v: V) => {
+      i?.update(get(), v);
       trigger();
     },
   }));

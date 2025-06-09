@@ -1,9 +1,9 @@
-<script setup lang="ts" generic="F extends QFormData">
+<script setup lang="ts" generic="F extends object">
 import Form from "@arco-design/web-vue/es/form/form";
 import Space from "@arco-design/web-vue/es/space/space";
 import { nextTick, reactive, shallowRef, useTemplateRef } from "vue";
 
-import { useFormItemProvide, useFormState, type QFormData, type UseForm } from "./use";
+import { useFormItemProvide, useFormState, type UseForm } from "./use";
 import { tryPromise } from "../utils";
 
 interface QFormProps {
@@ -41,8 +41,8 @@ const register = {
   reset: async () => {
     await nextTick();
     for (const k in data)
-      if (initial[k]) (data as F)[k as keyof F] = initial[k] as F[keyof F];
-      else delete data[k];
+      if (initial[k as keyof F]) (data as F)[k as keyof F] = initial[k as keyof F] as F[keyof F];
+      else delete (data as F)[k as keyof F];
   },
   validate: async () => {
     await nextTick();
@@ -68,7 +68,7 @@ useFormItemProvide({
   },
   unregister: (key) => {
     keys.delete(key);
-    delete data[key];
+    delete (data as F)[key as keyof F];
   },
 });
 

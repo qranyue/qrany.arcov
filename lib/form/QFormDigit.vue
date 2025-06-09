@@ -18,7 +18,7 @@ interface QFormDigitProps {
 
 const { name } = defineProps<QFormDigitProps>();
 
-const value = useFormItemInject(() => name);
+const value = useFormItemInject<number>(() => name);
 </script>
 
 <template>

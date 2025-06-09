@@ -1,21 +1,30 @@
 <script setup lang="ts">
 import { Button, Input } from "@arco-design/web-vue";
-import { QForm, QFormDigit, QFormItem, QFormText, QFormTextArea, type QFormData } from "../../lib/form";
+import { QForm, QFormDigit, QFormItem, QFormText, QFormTextArea } from "../../lib/form";
 
-interface FormValues extends QFormData {
+interface FormValues {
   item: string;
   name: string;
   digit: number;
   text: string;
 }
 
-const onSubmit = (values: QFormData) => {
-  console.log(values as FormValues);
+const onSubmit = (values: FormValues) => {
+  console.log(values);
+};
+
+const request = async () => {
+  return {
+    item: "item",
+    name: "name",
+    digit: 1,
+    text: "text",
+  } as FormValues;
 };
 </script>
 
 <template>
-  <QForm @submit="onSubmit">
+  <QForm :request="request" @submit="onSubmit">
     <QFormItem name="item" label="Item">
       <Input></Input>
     </QFormItem>
