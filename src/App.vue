@@ -4,14 +4,16 @@ import { RouterView } from "vue-router";
 </script>
 
 <template>
-  <Row align="center" justify="center" :gutter="20">
-    <Col flex="none">
-      <RouterLink to="/">Home</RouterLink>
-    </Col>
-    <Col flex="none">
-      <RouterLink to="/form">Form</RouterLink>
-    </Col>
-  </Row>
+  <section style="padding: 12px 24px; background-color: white">
+    <Row align="center" justify="center" :gutter="20">
+      <Col flex="none">
+        <RouterLink to="/">Home</RouterLink>
+      </Col>
+      <Col flex="none">
+        <RouterLink to="/form">Form</RouterLink>
+      </Col>
+    </Row>
+  </section>
 
   <RouterView />
 </template>

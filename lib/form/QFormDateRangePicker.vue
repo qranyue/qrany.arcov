@@ -14,6 +14,10 @@ interface QFormDateRangePickerProps {
   help?: string;
   extra?: string;
   rules?: FieldRule | FieldRule[];
+
+  mode?: "week" | "month" | "quarter" | "year";
+  format?: string;
+  showTime?: boolean;
 }
 
 const { name } = defineProps<QFormDateRangePickerProps>();
@@ -23,6 +27,6 @@ const value = useFormItemInject(() => name);
 
 <template>
   <FormItem :field="name" :label="label" :tooltip="tooltip" :disabled="disabled" :help="help" :extra="extra" :rules="rules">
-    <RangePicker v-model="value" :placeholder="placeholder" allow-clear style="flex: auto"></RangePicker>
+    <RangePicker v-model="value" :mode="mode" :format="format" :show-time="showTime" :placeholder="placeholder" allow-clear style="flex: auto"></RangePicker>
   </FormItem>
 </template>

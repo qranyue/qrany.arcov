@@ -1,28 +1,18 @@
 <script setup lang="ts">
-import { Button, Card, Col, Input, Row } from "@arco-design/web-vue";
+import { Button, Card, Col, Input, Row, Space } from "@arco-design/web-vue";
 import {
   QForm,
   QFormDatePicker,
-  QFormDateTimePicker,
-  QFormDateTimeRangePicker,
+  QFormDateRangePicker,
   QFormDigit,
   QFormDigitRange,
   QFormItem,
-  QFormMonthPicker,
-  QFormMonthRangePicker,
   QFormPassword,
-  QFormQuarterPicker,
-  QFormQuarterRangePicker,
   QFormText,
   QFormTextArea,
   QFormTimePicker,
   QFormTimeRangePicker,
-  QFormWeekPicker,
-  QFormWeekRangePicker,
-  QFormYearPicker,
-  QFormYearRangePicker,
 } from "../../lib/form";
-import QFormDateRangePicker from "../../lib/form/QFormDateRangePicker.vue";
 
 interface FormValues {
   item: string;
@@ -47,7 +37,7 @@ const request = async () => {
 
 <template>
   <section style="padding: 24px">
-    <QForm auto :request="request" @submit="onSubmit">
+    <QForm :request="request" auto @submit="onSubmit">
       <Card title="文本">
         <Row :gutter="16">
           <Col :span="8">
@@ -79,19 +69,19 @@ const request = async () => {
             <QFormTimePicker name="time" label="Time" />
           </Col>
           <Col :span="8">
-            <QFormDateTimePicker name="date-time" label="DateTime" />
+            <QFormDatePicker name="date-time" label="DateTime" show-time />
           </Col>
           <Col :span="8">
-            <QFormYearPicker name="year" label="Year" />
+            <QFormDatePicker name="year" label="Year" mode="year" />
           </Col>
           <Col :span="8">
-            <QFormQuarterPicker name="quarter" label="Quarter" />
+            <QFormDatePicker name="quarter" label="Quarter" mode="quarter" />
           </Col>
           <Col :span="8">
-            <QFormMonthPicker name="month" label="Month" />
+            <QFormDatePicker name="month" label="Month" mode="month" />
           </Col>
           <Col :span="8">
-            <QFormWeekPicker name="week" label="Week" />
+            <QFormDatePicker name="week" label="Week" mode="week" />
           </Col>
           <Col :span="8">
             <QFormDatePicker name="date" label="Date" />
@@ -105,19 +95,19 @@ const request = async () => {
             <QFormTimeRangePicker name="time-range" label="Time" />
           </Col>
           <Col :span="8">
-            <QFormDateTimeRangePicker name="date-time-range" label="DateTime" />
+            <QFormDateRangePicker name="date-time-range" label="DateTime" show-time />
           </Col>
           <Col :span="8">
-            <QFormYearRangePicker name="year-range" label="Year" />
+            <QFormDateRangePicker name="year-range" label="Year" mode="year" />
           </Col>
           <Col :span="8">
-            <QFormQuarterRangePicker name="quarter-range" label="Quarter" />
+            <QFormDateRangePicker name="quarter-range" label="Quarter" mode="quarter" />
           </Col>
           <Col :span="8">
-            <QFormMonthRangePicker name="month-range" label="Month" />
+            <QFormDateRangePicker name="month-range" label="Month" mode="month" />
           </Col>
           <Col :span="8">
-            <QFormWeekRangePicker name="week" label="Week" />
+            <QFormDateRangePicker name="week-range" label="Week" mode="week" />
           </Col>
           <Col :span="8">
             <QFormDateRangePicker name="date-range" label="Date" />
@@ -135,10 +125,12 @@ const request = async () => {
         </Row>
       </Card>
 
-      <template #footer>
-        <Button html-type="reset">重置</Button>
-        <Button html-type="submit" type="primary">提交</Button>
-      </template>
+      <Card style="margin-top: 24px">
+        <Space>
+          <Button html-type="reset">重置</Button>
+          <Button html-type="submit" type="primary">提交</Button>
+        </Space>
+      </Card>
     </QForm>
   </section>
 </template>

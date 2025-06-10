@@ -25,6 +25,6 @@ const value = useFormItemInject(() => name);
 
 <template>
   <FormItem :field="name" :label="label" :tooltip="tooltip" :disabled="disabled" :help="help" :extra="extra" :rules="rules">
-    <TimePicker v-model="value" type="time-range" :format="format" :placeholder="placeholder" allow-clear></TimePicker>
+    <TimePicker v-model="value" type="time-range" :format="format" :placeholder="placeholder" allow-clear style="flex: auto"></TimePicker>
   </FormItem>
 </template>
