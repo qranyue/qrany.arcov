@@ -1,12 +1,12 @@
 <script setup lang="ts" generic="F">
 import FormItem from "@arco-design/web-vue/es/form/form-item";
-import Select from "@arco-design/web-vue/es/select/select";
+import TreeSelect from "@arco-design/web-vue/es/tree-select/tree-select";
 import type { FieldRule } from "@arco-design/web-vue/es/form/interface";
-import type { SelectOptionData } from "@arco-design/web-vue/es/select/interface";
+import type { TreeNodeData } from "@arco-design/web-vue/es/tree/interface";
 import { shallowRef, watchEffect } from "vue";
 
 import { useFormItemInject } from "./use";
-import { parseDict, tryPromise, type DictType } from "../utils";
+import { parseTree, tryPromise, type TreeDictType } from "../utils";
 
 interface QFormSelectProps {
   name: string;
@@ -19,20 +19,20 @@ interface QFormSelectProps {
   rules?: FieldRule | FieldRule[];
 
   multiple?: boolean;
-  enum?: DictType;
+  enum?: TreeDictType;
   params?: F;
-  request?: (params?: F) => Promise<DictType>;
+  request?: (params?: F) => Promise<TreeDictType>;
 
   virtual?: boolean;
 }
 
 const { name, params, enum: valueEnum, request } = defineProps<QFormSelectProps>();
 
-const options = shallowRef([] as SelectOptionData[]);
+const data = shallowRef([] as TreeNodeData[]);
 
 watchEffect(() => {
   if (!valueEnum) return;
-  options.value = parseDict(valueEnum);
+  data.value = parseTree(valueEnum);
 });
 
 const loading = shallowRef(false);
@@ -40,26 +40,26 @@ watchEffect(async () => {
   if (!request) return;
   loading.value = true;
   const [v] = await tryPromise(request(params));
-  if (v) options.value = parseDict(v);
+  if (v) data.value = parseTree(v);
   loading.value = false;
 });
 
 const value = useFormItemInject(() => name);
 
-const virtualProps = {};
+const treeProps = { virtualListProps: {} };
 </script>
 
 <template>
   <FormItem :field="name" :label="label" :tooltip="tooltip" :disabled="disabled" :help="help" :extra="extra" :rules="rules">
-    <Select
+    <TreeSelect
       v-model="value"
-      :options="options"
+      :data="data"
       :multiple="multiple"
       :placeholder="placeholder"
       :loading="loading"
-      :virtual-list-props="(virtual && virtualProps) || void 0"
+      :tree-props="(virtual && treeProps) || void 0"
       allow-clear
       allow-search
-    ></Select>
+    ></TreeSelect>
   </FormItem>
 </template>

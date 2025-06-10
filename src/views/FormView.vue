@@ -8,6 +8,7 @@ import {
   QFormDigitRange,
   QFormItem,
   QFormPassword,
+  QFormSelect,
   QFormText,
   QFormTextArea,
   QFormTimePicker,
@@ -33,6 +34,14 @@ const request = async () => {
     text: "text",
   } as FormValues;
 };
+
+const select = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return {
+    a: "0",
+    b: "1",
+  };
+};
 </script>
 
 <template>
@@ -48,6 +57,14 @@ const request = async () => {
           </Col>
           <Col :span="24">
             <QFormTextArea name="text" label="Text" />
+          </Col>
+        </Row>
+      </Card>
+
+      <Card title="选择" style="margin-top: 24px">
+        <Row :gutter="16">
+          <Col :span="8">
+            <QFormSelect name="select" label="Select" :request="select" />
           </Col>
         </Row>
       </Card>

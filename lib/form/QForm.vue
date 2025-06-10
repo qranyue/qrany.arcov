@@ -63,7 +63,8 @@ useFormItemProvide({
     keys.add(key);
   },
   update: (key, value) => {
-    (data as F)[key as keyof F] = value as F[keyof F];
+    if (!value) delete (data as F)[key as keyof F];
+    else (data as F)[key as keyof F] = value as F[keyof F];
   },
   unregister: (key) => {
     keys.delete(key);
