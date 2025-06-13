@@ -1,33 +1,35 @@
 import type { ValidatedError } from "@arco-design/web-vue/es/form/interface";
 import { computed, inject, provide, watchEffect, type InjectionKey, type Reactive } from "vue";
 
-const FORM = Symbol();
+const FORM_SYMBOL = Symbol();
 
-const FORM_DATA = Symbol() as InjectionKey<Reactive<object>>;
+const FORM_MODEL = Symbol() as InjectionKey<Reactive<object>>;
 
 interface UseFormStateParam<T extends object> {
   clear: () => Promise<void>;
-  fields: (data: T) => Promise<void>;
+  fields: (data: Partial<T>) => Promise<void>;
   reset: () => Promise<void>;
   validate: () => Promise<Record<string, ValidatedError> | undefined>;
-  validates: (name: keyof T | (keyof T)[]) => Promise<Record<string, ValidatedError> | undefined>;
+  validates: (...names: (keyof T)[]) => Promise<Record<string, ValidatedError> | undefined>;
 
-  data: Reactive<T>;
+  model: Reactive<T>;
   form: () => UseForm<T> | undefined;
 }
 
 export const useFormState = <T extends object>(state: UseFormStateParam<T>) => {
-  const { data, form, ...rest } = state;
-  provide(FORM_DATA, data);
-  watchEffect(() => form()?.[FORM]?.(rest));
+  const { model: data, form, ...rest } = state;
+  provide(FORM_MODEL, data);
+  watchEffect(() => form()?.[FORM_SYMBOL]?.(rest));
 };
 
-export interface UseForm<T extends object> extends Omit<UseFormStateParam<T>, "data" | "form"> {
-  [FORM]?: (state: Omit<UseFormStateParam<T>, "data" | "form">) => void;
+export const useFormModelInject = () => inject(FORM_MODEL);
+
+export interface UseForm<T extends object> extends Omit<UseFormStateParam<T>, "model" | "form"> {
+  [FORM_SYMBOL]?: (state: Omit<UseFormStateParam<T>, "model" | "form">) => void;
 }
 
 export const useForm = <T extends object>() => {
-  type UF = Omit<UseForm<T>, typeof FORM>;
+  type UF = Omit<UseForm<T>, typeof FORM_SYMBOL>;
   let es: [string, never[], (value: never) => void][] | void;
   const ev = (type: string, data: never[]) => {
     return new Promise<never>((resolve) => {
@@ -41,7 +43,7 @@ export const useForm = <T extends object>() => {
     reset: () => ev("reset", []),
     validate: () => ev("validate", []),
     validates: (name) => ev("validates", [name as never]),
-    [FORM]: (state) => {
+    [FORM_SYMBOL]: (state) => {
       form.clear = state.clear;
       form.fields = state.fields;
       form.reset = state.reset;
@@ -52,7 +54,7 @@ export const useForm = <T extends object>() => {
         (async () => resolve(await fn(...data)))();
       }
       es = void 0;
-      delete form[FORM];
+      delete form[FORM_SYMBOL];
     },
   } as UseForm<T>;
   return form;
@@ -84,7 +86,7 @@ export const useFormItemInject = <V>(get: () => string) => {
     });
   });
 
-  const data = inject(FORM_DATA, {});
+  const data = inject(FORM_MODEL, {});
   return computed({
     get: () => (data as object)[get() as keyof object] as V,
     set: (v) => i?.update(get(), v),

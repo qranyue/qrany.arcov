@@ -19,7 +19,7 @@ interface QFormCaptchaProps {
   extra?: string;
   rules?: FieldRule | FieldRule[];
 
-  getCaptcha?: (phone: string) => Promise<string>;
+  getCaptcha?: (phone: string) => Promise<void> | void;
   count?: number;
   text?: (time: number) => string;
 }
